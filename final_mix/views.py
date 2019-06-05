@@ -26,22 +26,23 @@ def get_cat_streamer(cat="遊戲"):
         docs.append(content)
     return docs[0:10]
 
-def get_videos(ename):
+def get_videos(ename,videosCount):
     docs=[]
-    count = 10
-    videos = helix.user(ename).videos(first=count)
+    count = videosCount
+    videos = helix.user(ename).videos(first=int(count))
     for video in videos:
-        content = {"title":video.title,"created_at":video.created_at,"id":video.id,"view_count":video.view_count,"thumbnail_url":video.thumbnail_url}
+        content = {"title":video.title,"created_at":video.created_at,"id":video.id,"view_count":video.view_count,"thumbnail_url":video.thumbnail_url,"duration":video.duration}
         docs.append(content)
 
-    return docs[0:count]
+    return docs[0:int(count)]
 
 def api_streamer_videos(request):
     sid = request.GET['streamer_id']
+    videosCount = request.GET['videosCount']
     itemdf = df[df.sid == sid]
     ename = itemdf.iloc[0].ename
     #content = {"ename":ename}
-    content = get_videos(ename)
+    content = get_videos(ename,videosCount)
 
     return JsonResponse({"content": content})
 

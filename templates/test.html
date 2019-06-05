@@ -4,19 +4,21 @@
     <meta charset="UTF-8">
     <title>Twitch聊天室關鍵詞分析</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
-
 </head>
+
 <body>
 
 <div class="container">
+
     {% include 'navbar.html' %}
+
     <div class="row">
-         <div class="col-lg-6 mb-5">
+        <div class="col-lg-6 mb-5">
             <div class="card">
                 <div class="card-header">
                     <h3 class="h6 text-uppercase mb-0">選擇實況主</h3>
@@ -35,6 +37,15 @@
                             </select>
                             </small>
                         </div>
+
+                        <label class="col-sm-3 form-control-label">影片數量</label>
+                        <div class="col-md-9 select mb-3">
+                            <div class="slidecontainer">
+                              <input type="range" min="1" max="20"  value="1" class="slider" id="myRange">
+                              <p><span id="range_value"></span></p>
+                            </div>
+                        </div>
+
                     </div>
 
                     <ul id="cat_streamer"></ul>
@@ -42,70 +53,61 @@
                 </div>
             </div>
         </div>
+        <div class="col-lg-6 mb-5">
+            <div class="card">
+                <div class="card-body">
+                    <h5>狀態:</h5>
+                    <div id="progress"></div>
+                    <hr>
+                    <div id="streamer_userdata"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="row" id="videodata">
+    <div class="row" id="videodata"></div>
 
-{#        <div class="col-lg-4 mb-4">#}
-{#          <div class="card h-100">#}
-{#            <h4 class="card-header">1</h4>#}
-{#            <div class="card-body">#}
-{#              <img src='.$obj->data[$i]->thumbnail_url.' width="100%" height="100%" object-fit:cover >#}
-{#            </div>#}
-{#            <div class="card-footer">#}
-{##}
-{#            </div>#}
-{#          </div>#}
-{#        </div>#}
-{#         <div class="col-lg-4 mb-4">#}
-{#          <div class="card h-100">#}
-{#            <h4 class="card-header">1</h4>#}
-{#            <div class="card-body">#}
-{#              <img src='.$obj->data[$i]->thumbnail_url.' width="100%" height="100%" object-fit:cover >#}
-{#            </div>#}
-{#            <div class="card-footer">#}
-{##}
-{#            </div>#}
-{#          </div>#}
-{#        </div>#}
-{#         <div class="col-lg-4 mb-4">#}
-{#          <div class="card h-100">#}
-{#            <h4 class="card-header">1</h4>#}
-{#            <div class="card-body">#}
-{#              <img src='.$obj->data[$i]->thumbnail_url.' width="100%" height="100%" object-fit:cover >#}
-{#            </div>#}
-{#            <div class="card-footer">#}
-{##}
-{#            </div>#}
-{#          </div>#}
-{#        </div>#}
-
-{#         <div class="col-lg-4 mb-4">#}
-{#          <div class="card h-100">#}
-{#            <h4 class="card-header">1</h4>#}
-{#            <div class="card-body">#}
-{#              <iframe src="https://player.twitch.tv/?video=434321692&autoplay=false" frameborder="0" allowfullscreen="true" height="300px" width="460px"></iframe>#}
-{#            </div>#}
-{#            <div class="card-footer">#}
-{##}
-{#            </div>#}
-{#          </div>#}
-{#        </div>#}
-
-    </div>
 
 </div>
+
+<!--浮動視窗-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" >
+        <div class="modal-content" style="height: 360px">
+          <div class="modal-header">
+{#		    <h4 class="modal-title" style="text-align:center">878787878</h4>#}
+            <button onclick="closeVideo()" type="button" class="close"  data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+          </div>
+
+          <div class="video-container" >
+				<div  id="videoContent"></div>
+          </div>
+{#          <div class="modal-footer" id="dbutton">#}
+{##}
+{#          </div>#}
+        </div>
+    </div>
+</div>
+<!---->
+
+
+
 
 
 </body>
 </html>
 
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
 <script>
     $(document).ready(function () {
 
         var videodata = document.getElementById("videodata");
+        var videoContent = document.getElementById('videoContent');
+        var progress = document.getElementById("progress");
+        var videosCount = 1;
 
         $('#cat_select').on('change',function () {
 
@@ -132,37 +134,61 @@
         })
 
          $(document).on('click', 'a.btn_like_streamer', function () {
-            videodata.innerHTML = "";
+            progress.innerHTML = '讀取中 <progress id="p"></progress>';
             streamerid = $(this).attr('streamer_id');
-            console.log(streamerid);
-            showVideos(streamerid);
+            //console.log(streamerid);
+            showVideos(streamerid,videosCount);
         });
 
-        showVideos = function (streamer_id) {
+        showVideos = function (streamer_id,videosCount) {
             $.ajax({
                 type: "GET",
                 url: "api_streamer_videos/",
-                data: {"streamer_id": streamer_id},
+                data: {"streamer_id": streamer_id,"videosCount":videosCount},
                 success: function (received_data) {
+                    progress.innerHTML = '讀取完成! <br/>數量:'+videosCount
+                    videodata.innerHTML = "";
+
                      var items = received_data['content'];
 
                      for(var i=0;i<items.length;i++){
                          var img_src = items[i].thumbnail_url;
                          //img_src = img_src.substr(0,img_src.lastIndexOf('-')+1)+"1000x1000.jpg";
                          var format = img_src.substr(img_src.lastIndexOf('.'))
-                         img_src = img_src.substr(0,img_src.lastIndexOf('-')+1)+"1000x1000"+format;
+                         img_src = img_src.substr(0,img_src.lastIndexOf('-')+1)+"500x500"+format;
 
                          videodata.innerHTML += '<div class="col-lg-4 mb-4"><div class="card h-100"><h5 class="card-header"><strong>'+items[i].title+'</strong></h5>' +
                              '<div class="card-body"><img src="'+img_src+'" width="300px" height="300px"></div>'+
-                             '<div class="card-footer"><button class="btn btn-primary">Watch</button>' +'       '+
-                             '<button class="btn btn-warning">分析</button><hr>觀看次數: '+items[i].view_count+'<br>時間: '+items[i].created_at+'</div></div></div>';
-                        //videodata.innerHTML += items[i].title+" , "+items[i].created_at+" , "+items[i].id+" , "+items[i].view_count;
+                             '<div class="card-footer"><button class="btn btn-primary" onclick="watch('+items[i].id+')">Watch</button>' +'       '+
+                             '<button class="btn btn-warning">分析</button><hr>觀看次數: '+items[i].view_count+'<br>開台長度: '+items[i].duration+'<br>開台時間: '+items[i].created_at+'</div></div></div>';
+                         //console.log(img_src);
+                         //videodata.innerHTML += items[i].title+" , "+items[i].created_at+" , "+items[i].id+" , "+items[i].view_count;
                         //videodata.innerHTML += "<br/>"
                      }
 
                 }
             });
 
+        }
+        watch = function (id) {
+            url = 'https://player.twitch.tv/?video='+id;
+            embedUrl='<div align="center"><iframe src="'+url+'" frameborder="0" allowfullscreen="true" height="300px" width="495px"></iframe></div>';
+		    videoContent.innerHTML = embedUrl;
+		    $('#myModal').modal({backdrop: 'static', keyboard: false});
+            $('#myModal').modal('show');
+
+        }
+        closeVideo = function () {
+            videoContent.innerHTML="";
+        }
+
+
+        var slider = document.getElementById("myRange");
+        var range_value = document.getElementById("range_value");
+        range_value.innerHTML = slider.value;
+        slider.oninput = function() {
+          range_value.innerHTML = this.value;
+          videosCount = this.value;
         }
 
     });
