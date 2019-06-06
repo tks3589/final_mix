@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>分析結果</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+               <div class="col-lg-6 mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="h6 text-uppercase mb-0">關鍵字長條圖</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id='mychart'></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{{ chat_comments }}
+</body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+<script>
+      $(document).ready(function () {
+
+        var ctx1 = document.getElementById("mychart");
+        var chartdata = {{  chat_comments | safe }};
+        //alert(chartdata);
+        var values = chartdata.values;
+        var labels = chartdata.labels;
+        //alert(values)
+
+        console.log(values);
+        var data = {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: ['#9370db','#c0c0c0','#9370db','#c0c0c0','#9370db'],
+            }]
+        };
+
+        var options = {
+            legend: {
+                display: false,
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            },
+        }
+
+        new Chart(ctx1, {
+            type: 'bar',
+            data: data,
+            options: options,
+        });
+
+    });
+</script>

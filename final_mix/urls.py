@@ -23,4 +23,5 @@ urlpatterns = [
     path('', views.show_index),
     path('api_cat_streamer/', views.api_cat_streamer),
     path('api_streamer_videos/', views.api_streamer_videos),
+    path('show_result/',views.show_result),
 ]

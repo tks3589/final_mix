@@ -160,7 +160,7 @@
                          videodata.innerHTML += '<div class="col-lg-4 mb-4"><div class="card h-100"><h5 class="card-header"><strong>'+items[i].title+'</strong></h5>' +
                              '<div class="card-body"><img src="'+img_src+'" width="300px" height="300px"></div>'+
                              '<div class="card-footer"><button class="btn btn-primary" onclick="watch('+items[i].id+')">Watch</button>' +'       '+
-                             '<button class="btn btn-warning">分析</button><hr>觀看次數: '+items[i].view_count+'<br>開台長度: '+items[i].duration+'<br>開台時間: '+items[i].created_at+'</div></div></div>';
+                             '<button class="btn btn-warning" onclick="rec('+items[i].id+')">分析</button><hr>觀看次數: '+items[i].view_count+'<br>開台長度: '+items[i].duration+'<br>開台時間: '+items[i].created_at+'</div></div></div>';
                          //console.log(img_src);
                          //videodata.innerHTML += items[i].title+" , "+items[i].created_at+" , "+items[i].id+" , "+items[i].view_count;
                         //videodata.innerHTML += "<br/>"
@@ -182,7 +182,7 @@
             videoContent.innerHTML="";
         }
 
-
+        /*slide-bar*/
         var slider = document.getElementById("myRange");
         var range_value = document.getElementById("range_value");
         range_value.innerHTML = slider.value;
@@ -190,6 +190,19 @@
           range_value.innerHTML = this.value;
           videosCount = this.value;
         }
+
+        /*message*/
+        rec = function (video_id) {
+            var message = confirm("確定要分析這部影片嗎?");
+            if(message) {
+                console.log("true");
+                window.open("http://127.0.0.1:8003/show_result?id="+video_id);
+            }
+            else
+                console.log("false");
+        }
+
+
 
     });
 </script>
