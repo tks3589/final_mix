@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from collections import Counter
+import os
 import datetime
 import jieba
 jieba.set_dictionary('final_mix/jieba_big_chinese_dict/dict.txt.big')
@@ -62,17 +63,21 @@ def api_streamer_videos(request):
 
 def show_result(request):
     video_id = request.GET['id']
-    chat_comments = word_frequency(getChatComments(video_id))
+    c = jiebaLcut(getChatComments(video_id))
+    chart_chat_comments = word_frequency(c)
+    cloud_chat_comments = cloud_frequency(c)
 
-    return render(request,'result.html',{"chat_comments":chat_comments})
+
+    return render(request,'result.html',{"chart_chat_comments":chart_chat_comments,"cloud_chat_comments":cloud_chat_comments})
 
 
-def word_frequency(text):
-    words = [word for word in jieba.lcut(text) if len(word) >= 2]
-    c = Counter(words)
+
+
+
+def word_frequency(c):
     wa = []
     ca = []
-    for word_freq in c.most_common(5):
+    for word_freq in c.most_common(10):
         word, count = word_freq
         wa.append(word)
         ca.append(count)
@@ -84,13 +89,46 @@ def word_frequency(text):
     return data
 
 
-def getChatComments(id):
-    comments = helix.video(id).comments()
+def cloud_frequency(c):
+    data = []
+    for word_freq in c.most_common(10):
+        word, count = word_freq
+        collection = []
+        collection.append(word)
+        collection.append(count)
+        data.append(collection)
+
+    return data
+
+
+def jiebaLcut(text):
+    words = [word for word in jieba.lcut(text) if len(word) >= 2 and len(word) <= 10]
+    c = Counter(words)
+
+    return c
+
+
+def getChatComments(id): #判斷net or local
     text = ''
-    for i in range(20):
-        text += str(comments[i].message.body + ",")
+    filepath = 'final_mix/dataset/videos/'+id+'.xlsx'
+    if os.path.isfile(filepath):
+        print("file is exist: get local")
+        df2 = pd.read_excel(filepath)
+        df2_comment = df2['comment']
+        for i in range(len(df2_comment)):
+            text += str(df2_comment[i]+",")
+    else:
+        print("no file: get net")
+        comments = helix.video(id).comments()
+        for i in range(200):
+            try:
+                text += str(comments[i].message.body + ",")
+            except:
+                break
 
     return text
+
+
 
 
 

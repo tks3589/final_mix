@@ -12,7 +12,8 @@
 <body>
     <div class="container">
         <div class="row">
-               <div class="col-lg-6 mb-5">
+
+            <div class="col-lg-6 mb-5">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="h6 text-uppercase mb-0">關鍵字長條圖</h3>
@@ -22,6 +23,20 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-lg-6 mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="h6 text-uppercase mb-0">關鍵字標籤雲</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="canvas-container" align="center">
+                            <canvas id="mycloud" width="400px" height="250px"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -35,7 +50,7 @@
       $(document).ready(function () {
 
         var ctx1 = document.getElementById("mychart");
-        var chartdata = {{  chat_comments | safe }};
+        var chartdata = {{  chart_chat_comments | safe }};
         //alert(chartdata);
         var values = chartdata.values;
         var labels = chartdata.labels;
@@ -46,7 +61,7 @@
             labels: labels,
             datasets: [{
                 data: values,
-                backgroundColor: ['#9370db','#c0c0c0','#9370db','#c0c0c0','#9370db'],
+                backgroundColor: ['#9370db','#c0c0c0','#9370db','#c0c0c0','#9370db','#c0c0c0','#9370db','#c0c0c0','#9370db','#c0c0c0'],
             }]
         };
 
@@ -70,4 +85,24 @@
         });
 
     });
+</script>
+
+<script src="https://cdn.bootcss.com/wordcloud2.js/1.1.0/wordcloud2.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    var clouddata = {{  cloud_chat_comments | safe}};
+    alert(clouddata)
+    var options = eval({
+        "list": clouddata,
+
+        "gridSize": 16, // size of the grid in pixels
+        "weightFactor": 3, // number to multiply for size of each word in the list
+        "fontWeight": 'normal', // 'normal', 'bold' or a callback
+        "fontFamily": 'Times, serif', // font to use
+        "color": 'random-light', // 'random-dark' or 'random-light'
+        "backgroundColor": '#333', // the color of canvas
+        "rotateRatio": 1 // probability for the word to rotate. 1 means always rotate
+    });
+    var canvas = document.getElementById('mycloud');
+    WordCloud(canvas, options);
 </script>
