@@ -12,6 +12,7 @@ helix = twitch.Helix('xlxzn6l41n4x7t549rex0tjdfyho4r')
 import pandas as pd
 df = pd.read_excel('final_mix/dataset/streamer.xlsx')
 
+
 def show_index(request):
     return render(request,'test.html')
 
@@ -36,7 +37,7 @@ def get_videos(ename,videosCount):
     count = videosCount
     videos = helix.user(ename).videos(first=int(count))
     for video in videos:
-        content = {"title":video.title,"created_at":timeFormat(video.created_at),"id":video.id,"view_count":video.view_count,"thumbnail_url":video.thumbnail_url,"duration":video.duration}
+        content = {"title":video.title,"created_at":timeFormat(video.created_at),"id":video.id,"view_count":video.view_count,"thumbnail_url":video.thumbnail_url,"duration":video.duration,"ename":ename}
         docs.append(content)
 
     return docs[0:int(count)]
@@ -56,14 +57,29 @@ def api_streamer_videos(request):
     ename = itemdf.iloc[0].ename
     #content = {"ename":ename}
     content = get_videos(ename,videosCount)
+    checkVideo = get_exist_videos(ename)
 
-    return JsonResponse({"content": content})
+    return JsonResponse({"content": content,"checkVideo":checkVideo})
+
+def get_exist_videos(ename):
+    exist_videos = []
+    dirpath = 'final_mix/dataset/videos/' + ename
+    if os.path.isdir(dirpath):
+        for video in os.listdir(dirpath):
+            #print(video[0:9])
+            exist_videos.append(video[0:9])
+
+
+    return exist_videos
+
+
 
 
 
 def show_result(request):
     video_id = request.GET['id']
-    c = jiebaLcut(getChatComments(video_id))
+    user_id = request.GET['username']
+    c = jiebaLcut(getChatComments(video_id,user_id))
     chart_chat_comments = word_frequency(c)
     cloud_chat_comments = cloud_frequency(c)
 
@@ -108,25 +124,48 @@ def jiebaLcut(text):
     return c
 
 
-def getChatComments(id): #判斷net or local
+def getChatComments(video_id,user_id): #判斷net or local
+    count = 200 #撈的訊息筆數
     text = ''
-    filepath = 'final_mix/dataset/videos/'+id+'.xlsx'
+    dirpath = 'final_mix/dataset/videos/'+user_id
+    if os.path.isdir(dirpath):
+        print(dirpath + ' is exit')
+    else:
+        os.mkdir(dirpath)
+        print(dirpath + ' is created')
+
+    filepath = 'final_mix/dataset/videos/'+user_id+'/'+video_id+'.xlsx'
     if os.path.isfile(filepath):
         print("file is exist: get local")
         df2 = pd.read_excel(filepath)
         df2_comment = df2['comment']
         for i in range(len(df2_comment)):
-            text += str(df2_comment[i]+",")
+            text += str(df2_comment[i])+","
     else:
-        print("no file: get net")
-        comments = helix.video(id).comments()
-        for i in range(200):
+        print("no file: get net")  #順便存檔
+        comments = helix.video(video_id).comments()
+        id = []
+        comment = []
+        for i in range(count):
             try:
-                text += str(comments[i].message.body + ",")
+                id.append(comments[i].commenter.display_name)
+                comment.append(comments[i].message.body)
+                text += str(comments[i].message.body)+","
+                print(str(i)+" ---> "+id[i] + " : " + comment[i])
             except:
                 break
 
+        df2 = pd.DataFrame(columns=['id', 'comment'])
+        df2['id'] = id
+        df2['comment'] = comment
+
+        df2.to_excel('final_mix/dataset/videos/'+user_id+'/'+video_id+'.xlsx')
+        print('save file '+video_id)
+
     return text
+
+
+
 
 
 
