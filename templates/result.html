@@ -37,10 +37,44 @@
                 </div>
             </div>
 
+            <div class="col-lg-6 mb-5">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="h6 text-uppercase mb-0">聊天室情緒分析</h3>
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        {% if sentences_senti_count %}
+                            <p>
+                                <small class="form-text text-muted ml-3">
+                                    正面言論:{{ sentences_senti_count.pos }}句，
+                                    負面言論:{{ sentences_senti_count.neg }}句，
+                                    中立言論:{{ sentences_senti_count.obj }}句
+                                </small>
+                            </p>
+                            <hr>
+                            <p>
+                                <button type="button" id="chart_toggle" class="btn btn-outline-primary">切換長條圖</button>
+                            </p>
+                        {% endif %}
+                    </div>
+
+
+                    <div class="row">
+                        <canvas id="sentence_senti_pie_chart"></canvas>
+
+                    </div>
+
+                </div><!--card body-->
+            </div> <!-- card -->
+
+        </div>
+
         </div>
     </div>
 
-{{ chat_comments }}
+
 </body>
 </html>
 
@@ -96,7 +130,7 @@
         "list": clouddata,
 
         "gridSize": 16, // size of the grid in pixels
-        "weightFactor": 3, // number to multiply for size of each word in the list
+        "weightFactor": 1, // number to multiply for size of each word in the list
         "fontWeight": 'normal', // 'normal', 'bold' or a callback
         "fontFamily": 'Times, serif', // font to use
         "color": 'random-light', // 'random-dark' or 'random-light'
@@ -105,4 +139,82 @@
     });
     var canvas = document.getElementById('mycloud');
     WordCloud(canvas, options);
+</script>
+
+
+
+<script>
+
+    showchart();
+
+    function showchart() {
+
+
+        ctx1 = document.getElementById("sentence_senti_pie_chart");
+
+        var data_sentence = {{ sentences_senti_count | safe}};
+
+
+
+        if (data_sentence.length === 0) {
+            console.log("空的");
+            return 0;
+        }
+
+        //資料標題
+        const labels = ['正面', '負面', '中立'];
+
+
+        data_sent = {
+            labels: labels,
+            datasets: [{
+                //label: '我的繪圖',
+                data: [data_sentence.pos, data_sentence.neg, data_sentence.obj],
+                backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe'],
+            }],
+        };
+
+
+
+        options = {
+            legend: {
+                display: false,
+            },
+
+        };
+        //產生一個圖物件 不加修飾語 var 後面切換圖事件方法會用到這個變數
+        chart1 = new Chart(ctx1, {
+            type: 'pie',
+            data: data_sent,
+        });
+
+
+    } //showchart()
+
+
+    //** 切換長條圖或是餅圖 按鈕------------------------------
+    var toggle = true;
+    $("#chart_toggle").click(function () {
+
+        if (toggle) {
+            $(this).text("切換成餅圖");
+            //產生一個圖物件 先把前一次的圖清掉 (也可以不做)
+            // chart1 在前面有定義過，是global變數，在此處可以直接access
+            chart1.destroy();
+            chart1 = new Chart(ctx1, {
+                type: 'bar',
+                data: data_sent,
+                options: options,
+            });
+        } else {
+            $(this).text("切換成長條圖");
+            chart1.destroy();
+            chart1 = new Chart(ctx1, {
+                type: 'pie',
+                data: data_sent,
+            });
+        }
+        toggle = !toggle; //true畫長條圖,  fasle畫餅圖
+        console.log("chart_toggle");
+    });
 </script>

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from collections import Counter
+from snownlp import SnowNLP
 import os
 import datetime
 import jieba
@@ -79,12 +80,14 @@ def get_exist_videos(ename):
 def show_result(request):
     video_id = request.GET['id']
     user_id = request.GET['username']
-    c = jiebaLcut(getChatComments(video_id,user_id))
+    chat_text = getChatComments(video_id,user_id)
+    c = jiebaLcut(chat_text)
     chart_chat_comments = word_frequency(c)
     cloud_chat_comments = cloud_frequency(c)
 
+    sentences_senti_count = get_sentiment(chat_text)
 
-    return render(request,'result.html',{"chart_chat_comments":chart_chat_comments,"cloud_chat_comments":cloud_chat_comments})
+    return render(request,'result.html',{"chart_chat_comments":chart_chat_comments,"cloud_chat_comments":cloud_chat_comments,"sentences_senti_count":sentences_senti_count})
 
 
 
@@ -140,7 +143,8 @@ def getChatComments(video_id,user_id): #判斷net or local
         df2 = pd.read_excel(filepath)
         df2_comment = df2['comment']
         for i in range(len(df2_comment)):
-            text += str(df2_comment[i])+","
+            text += str(df2_comment[i])+"，"
+
     else:
         print("no file: get net")  #順便存檔
         comments = helix.video(video_id).comments()
@@ -150,7 +154,7 @@ def getChatComments(video_id,user_id): #判斷net or local
             try:
                 id.append(comments[i].commenter.display_name)
                 comment.append(comments[i].message.body)
-                text += str(comments[i].message.body)+","
+                text += str(comments[i].message.body)+"，"
                 print(str(i)+" ---> "+id[i] + " : " + comment[i])
             except:
                 break
@@ -163,6 +167,26 @@ def getChatComments(video_id,user_id): #判斷net or local
         print('save file '+video_id)
 
     return text
+
+
+def get_sentiment(text):
+    sentences_senti_count = {'pos': 0, 'neg': 0, 'obj': 0}
+    snow = SnowNLP(text)
+    for sen in snow.sentences:
+        #print(sen)
+        snow2 = SnowNLP(sen)
+        senti = snow2.sentiments
+        if senti > 0.6:
+            sentences_senti_count['pos'] += 1
+        elif senti < 0.4:
+            sentences_senti_count['neg'] += 1
+        else:
+            sentences_senti_count['obj'] += 1
+        print(str(sen)+"----->"+str(senti))
+
+    return sentences_senti_count
+
+
 
 
 
