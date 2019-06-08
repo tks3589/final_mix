@@ -31,7 +31,7 @@ def get_cat_streamer(cat="遊戲"):
         content = {"sid": df_cat.iloc[i].sid, "category": df_cat.iloc[i].category,
                    "sname": df_cat.iloc[i].sname }
         docs.append(content)
-    return docs[0:10]
+    return docs[0:20]
 
 def get_videos(ename,videosCount):
     docs=[]
@@ -80,6 +80,7 @@ def get_exist_videos(ename):
 def show_result(request):
     video_id = request.GET['id']
     user_id = request.GET['username']
+    video_title = helix.video(video_id).title
     chat_text = getChatComments(video_id,user_id)
     c = jiebaLcut(chat_text)
     chart_chat_comments = word_frequency(c)
@@ -88,7 +89,7 @@ def show_result(request):
 
     goodmanData,badmanData = get_viewers_sentiment(user_id,video_id)
 
-    return render(request,'result.html',{"chart_chat_comments":chart_chat_comments,
+    return render(request,'result.html',{"video_title":video_title,"chart_chat_comments":chart_chat_comments,
                                           "cloud_chat_comments":cloud_chat_comments,"sentences_senti_count":sentences_senti_count,
                                           "goodmanData":goodmanData,"badmanData":badmanData})
     # return render(request,'result.html',{"chart_chat_comments":chart_chat_comments,

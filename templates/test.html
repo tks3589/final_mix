@@ -47,7 +47,7 @@
                         <label class="col-sm-3 form-control-label">影片數量</label>
                         <div class="col-md-9 select mb-3">
                             <div class="slidecontainer">
-                              <input type="range" min="1" max="20"  value="1" class="slider" id="myRange">
+                              <input type="range" min="1" max="50"  value="1" class="slider" id="myRange">
                               <p><span id="range_value"></span></p>
                             </div>
                         </div>
@@ -175,14 +175,14 @@
                             videodata.innerHTML += '<div class="col-lg-4 mb-4"><div class="card h-100 border border-success"><h5 class="card-header"><strong>'+items[i].title+'</strong></h5>' +
                              '<div class="card-body"><img src="'+img_src+'" width="300px" height="300px"></div>'+
                              '<div class="card-footer"><button class="btn btn-primary" onclick="watch('+items[i].id+')">Watch</button>' +'       '+
-                             '<button class="btn btn-warning" onclick="rec('+items[i].id+','+'\''+items[i].ename+'\''+')">分析</button><hr>觀看次數: '+items[i].view_count+'<br>開台長度: '+items[i].duration+'<br>開台時間: '+items[i].created_at+'</div></div></div>';
+                             '<button class="btn btn-warning" onclick="rec('+items[i].id+',\''+items[i].ename+'\')">分析</button><hr>觀看次數: '+items[i].view_count+'<br>開台長度: '+items[i].duration+'<br>開台時間: '+items[i].created_at+'</div></div></div>';
 
                             flag = false;
                          }else{
                              videodata.innerHTML += '<div class="col-lg-4 mb-4"><div class="card h-100"><h5 class="card-header"><strong>'+items[i].title+'</strong></h5>' +
                              '<div class="card-body"><img src="'+img_src+'" width="300px" height="300px"></div>'+
                              '<div class="card-footer"><button class="btn btn-primary" onclick="watch('+items[i].id+')">Watch</button>' +'       '+
-                             '<button class="btn btn-warning" onclick="rec('+items[i].id+','+'\''+items[i].ename+'\''+')">分析</button><hr>觀看次數: '+items[i].view_count+'<br>開台長度: '+items[i].duration+'<br>開台時間: '+items[i].created_at+'</div></div></div>';
+                             '<button class="btn btn-warning" onclick="rec('+items[i].id+',\''+items[i].ename+'\')">分析</button><hr>觀看次數: '+items[i].view_count+'<br>開台長度: '+items[i].duration+'<br>開台時間: '+items[i].created_at+'</div></div></div>';
                          }
 
 

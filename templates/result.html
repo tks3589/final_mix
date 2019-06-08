@@ -10,6 +10,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </head>
 <body>
+    <h3>{{ video_title }}</h3>
     <div class="container">
         <div class="row">
 
@@ -20,6 +21,7 @@
                     </div>
                     <div class="card-body">
                         <canvas id='mychart'></canvas>
+                        {{ cloud_chat_comments }}
                     </div>
                 </div>
             </div>
@@ -32,6 +34,10 @@
                     <div class="card-body">
                         <div id="canvas-container" align="center">
                             <canvas id="mycloud" width="400px" height="250px"></canvas>
+                            <div class="slidecontainer">
+                              <input type="range" min="1" max="20"  value="1" class="slider" id="myRange">
+                              <p><span id="range_value"></span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -171,21 +177,39 @@
 <script src="https://cdn.bootcss.com/wordcloud2.js/1.1.0/wordcloud2.js"></script>
 <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 <script>
+    cloudTextSize = 1
+    canvas = document.getElementById('mycloud');
     var clouddata = {{  cloud_chat_comments | safe}};
     //alert(clouddata)
-    var options = eval({
+    /*var options = eval({
         "list": clouddata,
 
         "gridSize": 16, // size of the grid in pixels
-        "weightFactor": 1, // number to multiply for size of each word in the list
+        "weightFactor": cloudTextSize, // number to multiply for size of each word in the list
         "fontWeight": 'normal', // 'normal', 'bold' or a callback
         "fontFamily": 'Times, serif', // font to use
         "color": 'random-light', // 'random-dark' or 'random-light'
         "backgroundColor": '#333', // the color of canvas
         "rotateRatio": 1 // probability for the word to rotate. 1 means always rotate
-    });
-    var canvas = document.getElementById('mycloud');
-    WordCloud(canvas, options);
+    });*/
+
+    WordCloud(canvas, cloud_option(cloudTextSize));
+
+    function cloud_option(text_size){
+        var options = eval({
+            "list": clouddata,
+
+            "gridSize": 16, // size of the grid in pixels
+            "weightFactor": text_size, // number to multiply for size of each word in the list
+            "fontWeight": 'normal', // 'normal', 'bold' or a callback
+            "fontFamily": 'Times, serif', // font to use
+            "color": 'random-light', // 'random-dark' or 'random-light'
+            "backgroundColor": '#333', // the color of canvas
+            "rotateRatio": 1 // probability for the word to rotate. 1 means always rotate
+        });
+
+        return options;
+    }
 </script>
 
 
@@ -264,4 +288,16 @@
         toggle = !toggle; //true畫長條圖,  fasle畫餅圖
         console.log("chart_toggle");
     });
+</script>
+
+<script>
+    /*slide-bar*/
+        var slider = document.getElementById("myRange");
+        var range_value = document.getElementById("range_value");
+        range_value.innerHTML = slider.value;
+        slider.oninput = function() {
+          range_value.innerHTML = this.value;
+          cloudTextSize = this.value;
+          WordCloud(canvas, cloud_option(cloudTextSize));
+        }
 </script>
