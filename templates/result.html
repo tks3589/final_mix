@@ -87,7 +87,7 @@
 
                                         {% for comment in item.2 %}
                                             <hr>
-                                            <p style="font-style:italic;" >  {{ comment }}</p>
+                                            <p>  {{ comment }}</p>
                                             <hr>
                                         {% endfor %}
                                     </details>
@@ -104,7 +104,7 @@
 
                                         {% for comment in item.2 %}
                                             <hr>
-                                            <p style="font-style:italic;" >  {{ comment }}</p>
+                                            <p>  {{ comment }}</p>
                                             <hr>
                                         {% endfor %}
                                     </details>
@@ -133,7 +133,9 @@
         //alert(chartdata);
         var values = chartdata.values;
         var labels = chartdata.labels;
-        //alert(values)
+        //alert(values.length)
+        if(values.length == 0)
+            alert("這個影片沒有任何聊天室訊息喔")
 
         console.log(values);
         var data = {

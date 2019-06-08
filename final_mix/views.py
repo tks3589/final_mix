@@ -155,9 +155,11 @@ def getChatComments(video_id,user_id): #判斷net or local
         comment = []
         for i in range(count):
             try:
-                id.append(comments[i].commenter.display_name)
-                comment.append(comments[i].message.body)
-                text += str(comments[i].message.body)+"，"
+                display_name = str(comments[i].commenter.display_name)
+                viewer_comment = str(comments[i].message.body)
+                id.append(display_name)
+                comment.append(viewer_comment)
+                text += viewer_comment+"，"
                 print(str(i)+" ---> "+id[i] + " : " + comment[i])
             except:
                 break
@@ -174,6 +176,8 @@ def getChatComments(video_id,user_id): #判斷net or local
 
 def get_sentiment(text):
     sentences_senti_count = {'pos': 0, 'neg': 0, 'obj': 0}
+    if len(text) == 0:
+        return
     snow = SnowNLP(text)
     for sen in snow.sentences:
         #print(sen)
@@ -200,7 +204,7 @@ def get_viewers_sentiment(user_id,video_id):
     good = []
     bad = []
     for i in range(len(df_viewer)):
-        snow = SnowNLP(df_comment[i])
+        snow = SnowNLP(str(df_comment[i]))
         senti = snow.sentiments
         if senti > 0.6:
             good.append(df_viewer[i])
@@ -218,7 +222,7 @@ def get_viewers_sentiment(user_id,video_id):
         #print(count)
         goodman_cat = df[df.id == word]
         for i in range(len(goodman_cat)):
-            snow = SnowNLP(goodman_cat.iloc[i].comment)
+            snow = SnowNLP(str(goodman_cat.iloc[i].comment))
             senti = snow.sentiments
             if senti > 0.6:
                 goodComments.append(goodman_cat.iloc[i].comment)
@@ -229,7 +233,7 @@ def get_viewers_sentiment(user_id,video_id):
         word, count = word_freq
         badman_cat = df[df.id == word]
         for i in range(len(badman_cat)):
-            snow = SnowNLP(badman_cat.iloc[i].comment)
+            snow = SnowNLP(str(badman_cat.iloc[i].comment))
             senti = snow.sentiments
             if senti < 0.4:
                 badComments.append(badman_cat.iloc[i].comment)
