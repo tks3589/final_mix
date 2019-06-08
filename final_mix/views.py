@@ -84,12 +84,15 @@ def show_result(request):
     c = jiebaLcut(chat_text)
     chart_chat_comments = word_frequency(c)
     cloud_chat_comments = cloud_frequency(c)
-
     sentences_senti_count = get_sentiment(chat_text)
 
-    return render(request,'result.html',{"chart_chat_comments":chart_chat_comments,"cloud_chat_comments":cloud_chat_comments,"sentences_senti_count":sentences_senti_count})
+    goodmanData,badmanData = get_viewers_sentiment(user_id,video_id)
 
-
+    return render(request,'result.html',{"chart_chat_comments":chart_chat_comments,
+                                          "cloud_chat_comments":cloud_chat_comments,"sentences_senti_count":sentences_senti_count,
+                                          "goodmanData":goodmanData,"badmanData":badmanData})
+    # return render(request,'result.html',{"chart_chat_comments":chart_chat_comments,
+    #                                      "cloud_chat_comments":cloud_chat_comments,"sentences_senti_count":sentences_senti_count})
 
 
 
@@ -185,6 +188,58 @@ def get_sentiment(text):
         print(str(sen)+"----->"+str(senti))
 
     return sentences_senti_count
+
+
+
+
+def get_viewers_sentiment(user_id,video_id):
+    filepath = 'final_mix/dataset/videos/' + user_id + '/' + video_id + '.xlsx'
+    df = pd.read_excel(filepath)
+    df_viewer = df['id']
+    df_comment = df['comment']
+    good = []
+    bad = []
+    for i in range(len(df_viewer)):
+        snow = SnowNLP(df_comment[i])
+        senti = snow.sentiments
+        if senti > 0.6:
+            good.append(df_viewer[i])
+        elif senti < 0.4:
+            bad.append(df_viewer[i])
+
+    gc = Counter(good)
+    bc = Counter(bad)
+    goodman = []
+    badman = []
+    goodComments = []
+    badComments = []
+    for word_freq in gc.most_common(3):
+        word, count = word_freq
+        #print(count)
+        goodman_cat = df[df.id == word]
+        for i in range(len(goodman_cat)):
+            snow = SnowNLP(goodman_cat.iloc[i].comment)
+            senti = snow.sentiments
+            if senti > 0.6:
+                goodComments.append(goodman_cat.iloc[i].comment)
+        goodman.append((word,count,goodComments))
+        goodComments = []
+
+    for word_freq in bc.most_common(3):
+        word, count = word_freq
+        badman_cat = df[df.id == word]
+        for i in range(len(badman_cat)):
+            snow = SnowNLP(badman_cat.iloc[i].comment)
+            senti = snow.sentiments
+            if senti < 0.4:
+                badComments.append(badman_cat.iloc[i].comment)
+        badman.append((word,count,badComments))
+        badComments = []
+
+    return goodman,badman
+
+
+
 
 
 

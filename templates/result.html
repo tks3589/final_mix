@@ -71,6 +71,51 @@
 
         </div>
 
+            <div class="col-lg-6 mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="h6 text-uppercase mb-0">觀眾正負面評論排名</h3>
+                    </div>
+                    <div class="card-body">
+
+                        <h5>正面</h5>
+                        <ul>
+                            {% if  goodmanData %}
+                                {% for item in  goodmanData %}
+                                    <details>
+                                        <summary><strong>{{ item.0 }} 共 {{ item.1 }} 筆</strong></summary>
+
+                                        {% for comment in item.2 %}
+                                            <hr>
+                                            <p style="font-style:italic;" >  {{ comment }}</p>
+                                            <hr>
+                                        {% endfor %}
+                                    </details>
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+
+                        <h5>負面</h5>
+                        <ul>
+                            {% if  badmanData %}
+                                {% for item in  badmanData %}
+                                    <details>
+                                        <summary><strong>{{ item.0 }} 共 {{ item.1 }} 筆</strong></summary>
+
+                                        {% for comment in item.2 %}
+                                            <hr>
+                                            <p style="font-style:italic;" >  {{ comment }}</p>
+                                            <hr>
+                                        {% endfor %}
+                                    </details>
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
