@@ -4,6 +4,10 @@ from collections import Counter
 from snownlp import SnowNLP
 import os
 import datetime
+
+from gensim.models.doc2vec import Doc2Vec
+keyword_model = Doc2Vec.load("final_mix/dataset/model/comments_strTag.model")
+
 import jieba
 jieba.set_dictionary('final_mix/jieba_big_chinese_dict/dict.txt.big')
 
@@ -16,6 +20,11 @@ df = pd.read_excel('final_mix/dataset/streamer.xlsx')
 
 def show_index(request):
     return render(request,'test.html')
+
+def show_keywordVideo(request):
+    return render(request,'keywordVideo.html')
+
+
 
 def api_cat_streamer(request):
     cat = request.GET['category']
@@ -242,6 +251,31 @@ def get_viewers_sentiment(user_id,video_id):
         badComments = []
 
     return goodman,badman
+
+
+def api_get_keywordVideo(request):
+    word = request.GET['keyword']
+    keyword = []
+    keyword.append(str(word))
+    vec = keyword_model.infer_vector(keyword)
+    keywordVideoData = keyword_model.docvecs.most_similar([vec], topn=10)
+    filepath = 'final_mix/dataset/comments_doc2vec.xlsx'
+    read_df = pd.read_excel(filepath)
+    docs = []
+
+    for data in keywordVideoData:
+        vid = int(data[0])
+        rate = round(float(data[1]),3)
+        itemdf = read_df[read_df.vid == vid]
+        cname = itemdf.iloc[0].cname
+        title = itemdf.iloc[0].title
+        img = itemdf.iloc[0].img
+        content = {"vid": vid, "cname": cname, "title": title, "img": img,"rate":rate}
+        docs.append(content)
+
+
+    return JsonResponse({"keywordVideoData": docs})
+
 
 
 

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>關鍵詞影片推薦</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+    {% include 'navbar.html' %}
+
+    <div class="row">
+        <div class="col-lg-6 mb-5">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="h6 text-uppercase mb-0">輸入關鍵詞</h3>
+            </div>
+            <div class="card-body">
+
+                <div class="col-md-9">
+                    <input id="input_keyword" name="userkeyword"
+                           class="form-control form-control-success">
+
+                    <div id="progress"></div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="row" id="videodata"></div>
+</div>
+
+<!--浮動視窗-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" >
+        <div class="modal-content" style="height: 360px">
+          <div class="modal-header">
+{#		    <h4 class="modal-title" style="text-align:center">878787878</h4>#}
+            <button onclick="closeVideo()" type="button" class="close"  data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+          </div>
+
+          <div class="video-container" >
+				<div  id="videoContent"></div>
+          </div>
+{#          <div class="modal-footer" id="dbutton">#}
+{##}
+{#          </div>#}
+        </div>
+    </div>
+</div>
+<!---->
+
+
+</body>
+</html>
+
+<script>
+	var input = document.getElementById("input_keyword");
+	var videodata = document.getElementById("videodata");
+	var videoContent = document.getElementById('videoContent');
+	var progress = document.getElementById("progress");
+	input.addEventListener("keyup", function(event) {
+		event.preventDefault();
+		if (event.keyCode === 13) {
+		    var value = input.value.trim();
+			if(value.length!=0){
+			    videodata.innerHTML = '';
+                progress.innerHTML = '<br>讀取中 <progress id="p"></progress>';
+                $.ajax({
+                    type: "GET",
+                    url: "api_get_keywordVideo/",
+                    data: {"keyword": value},
+                    success: function (received_data) {
+                        progress.innerHTML = '<br>讀取完成!<br>'+"  <strong style='color:red;font-style:oblique' >關鍵詞: "+value+"</strong>";
+                        var data = received_data['keywordVideoData'];
+                        for(var i=0;i<data.length;i++){
+                            videodata.innerHTML += '<div class="col-lg-4 mb-4"><div class="card h-100"><h5 class="card-header"><strong>'+data[i].title+'</strong></h5>' +
+                             '<div class="card-body"><img src="'+data[i].img+'" width="300px" height="300px"></div>'+
+                             '<div class="card-footer"><button class="btn btn-primary" onclick="watch('+data[i].vid+')">Watch</button>'+'<hr>相似度: '+data[i].rate+'%</div></div></div>';
+                        }
+
+                    }
+                });
+            }else{
+			    alert('關鍵詞不能為空!');
+            }
+		}
+	});
+
+	watch = function (id) {
+            url = 'https://player.twitch.tv/?video='+id;
+            embedUrl='<div align="center"><iframe src="'+url+'" frameborder="0" allowfullscreen="true" height="300px" width="495px"></iframe></div>';
+		    videoContent.innerHTML = embedUrl;
+		    $('#myModal').modal({backdrop: 'static', keyboard: false});
+            $('#myModal').modal('show');
+
+    }
+    closeVideo = function () {
+        videoContent.innerHTML="";
+    }
+
+</script>

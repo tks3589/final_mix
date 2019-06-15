@@ -20,8 +20,10 @@ from final_mix import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.show_index),
+    path('', views.show_index,name='index'),
+    path('keywordVideo/',views.show_keywordVideo,name='keywordVideo'),
     path('api_cat_streamer/', views.api_cat_streamer),
     path('api_streamer_videos/', views.api_streamer_videos),
+    path('keywordVideo/api_get_keywordVideo/',views.api_get_keywordVideo),
     path('show_result/',views.show_result),
 ]
